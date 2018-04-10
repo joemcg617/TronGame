@@ -1,20 +1,20 @@
-function Bike(x, y) {
-  this.pos = createVector(x, y); //Bike's position
+function Bike(pos, player) {
+  this.player = player; //Player's Number
+  this.pos = pos; //Bike's position
   this.vel = createVector(0, -speed); //Bike's velocity
   this.graphics = createGraphics(width, height); //Graphics canvas for bike
   this.graphics.background(255, 0); //Graphics Background color. No alpha for transparency
   this.graphics.rectMode(CENTER);
   this.isAlive = true; //Is the bike alive?
-  this.nextDir = createVector(0, -1); // next direction it will turn when it hits a new intersection
+  this.nextDir = createVector(0, -speed); // next direction it will turn when it hits a new intersection
   this.locations = []; //locations that the bike has been
-  this.col = color(255, 0, 0);
+  this.col = color(random(255), random(255), random(255));
   this.explosion;
 
   /**
    * this.show is a function that draws the bike
    */
   this.show = function() {
-    this.graphics.background(51, 0);
     this.graphics.noStroke();
     this.graphics.fill(this.col);
     this.graphics.rect(this.pos.x / 2, this.pos.y / 2, bikeSize, bikeSize);
@@ -28,8 +28,54 @@ function Bike(x, y) {
   this.turn = function() {
     if (this.pos in vectorArray) {
       this.vel = this.nextDir;
-      this.locations[this.pos] = true;
+      vectorArray[this.pos] = true;
     }
+  }
+
+  this.getKeyFromPlayer = function(key) {
+    let dir;
+    switch (this.player) {
+      case 1:
+        switch (key) {
+          case UP_ARROW:
+            dir = "UP";
+            break;
+
+          case DOWN_ARROW:
+            dir = "DOWN";
+            break;
+
+          case LEFT_ARROW:
+            dir = "LEFT";
+            break;
+
+          case RIGHT_ARROW:
+            dir = "RIGHT";
+            break;
+        }
+        break;
+
+      case 2:
+        switch (key) {
+          case 87:
+            dir = "UP";
+            break;
+
+          case 83:
+            dir = "DOWN";
+            break;
+
+          case 65:
+            dir = "LEFT";
+            break;
+
+          case 68:
+            dir = "RIGHT";
+            break;
+        }
+        break;
+    }
+    this.changeDir(dir);
   }
 
   /**
@@ -39,19 +85,19 @@ function Bike(x, y) {
   this.changeDir = function(dir) {
     let dirVector = createVector(0, 0);
     switch (dir) {
-      case LEFT_ARROW:
+      case "LEFT":
         dirVector = createVector(-speed, 0);
         break;
 
-      case UP_ARROW:
+      case "UP":
         dirVector = createVector(0, -speed);
         break;
 
-      case RIGHT_ARROW:
+      case "RIGHT":
         dirVector = createVector(speed, 0);
         break;
 
-      case DOWN_ARROW:
+      case "DOWN":
         dirVector = createVector(0, speed);
         break;
 
@@ -68,7 +114,7 @@ function Bike(x, y) {
    * Checks for death
    */
   this.checkForDeath = function() {
-    if (this.pos in this.locations || (this.pos.x === width || this.pos.x === 0) || (this.pos.y === height || this.pos.y === 0)) {
+    if (vectorArray[this.pos] || (this.pos.x === width || this.pos.x === 0) || (this.pos.y === height || this.pos.y === 0)) {
       this.nextDir = createVector(0, 0);
       this.isAlive = false;
       this.explode();
@@ -94,6 +140,9 @@ function Bike(x, y) {
   }
 }
 
+
+
+//This is the Explosion animation class
 function ExplosionAnimation(bike) {
   this.bike = bike;
   this.graphics = createGraphics(width, height);
@@ -111,7 +160,9 @@ function ExplosionAnimation(bike) {
 
   this.showAnimation = function() {
     drawMap();
-    image(this.bike.graphics, 0, 0);
+    for (bike of bikes) {
+      image(bike.graphics, 0, 0);
+    }
     this.graphics.noStroke();
     this.graphics.fill(this.colorArray[0], this.colorArray[1], this.colorArray[2], this.colorArray[3]);
     this.graphics.ellipse(this.bike.pos.x / 2, this.bike.pos.y / 2, this.sz);

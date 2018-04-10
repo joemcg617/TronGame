@@ -1,9 +1,10 @@
 let bikes = [];
-let tileSize = 16;
-let bikeSize = tileSize / 8;
-let speed = 1;
+let tileSize = 8;
+let bikeSize = tileSize / 4;
+let speed = 4;
 let vectorArray = [];
-let players = 1;
+let possiblePositions = [];
+let players = 2;
 
 //Creates the javascript elements and sets globals. Runs once
 function setup() {
@@ -12,10 +13,10 @@ function setup() {
   noStroke();
   rectMode(CENTER);
   ellipseMode(CENTER);
-  for (i = 0; i < players; i++) {
-    bikes[i] = new Bike(width / 2, round(height / 1.33, 0));
-  }
   drawMap();
+  for (i = 0; i < players; i++) {
+    bikes[i] = new Bike(random(possiblePositions), i + 1);
+  }
 }
 
 //looping function
@@ -28,7 +29,7 @@ function draw() {
       bike.explosion.updateAnimation();
       bike.explosion.showAnimation();
       if (bike.explosion.isFinished()) {
-
+        bike.explosion.graphics.clear();
       }
     }
   }
@@ -38,14 +39,17 @@ function draw() {
 function drawMap() {
   push();
   stroke(200, 50);
-  strokeWeight(1);
+  strokeWeight(.5);
   noFill();
   rectMode(CORNER);
   background(51);
+  let count = 0;
   for (i = 0; i < width; i += tileSize) {
     for (j = 0; j < height; j += tileSize) {
       rect(i, j, tileSize, tileSize);
-      vectorArray[createVector(i, j)] = true;
+      possiblePositions[count] = createVector(i, j);
+      count++;
+      vectorArray[createVector(i, j)] = false;
     }
   }
   pop();
@@ -55,7 +59,7 @@ function drawMap() {
 function keyPressed() {
   for (bike of bikes) {
     if (bike.isAlive) {
-      bike.changeDir(keyCode);
+      bike.getKeyFromPlayer(keyCode);
     }
   }
 }
